@@ -71,6 +71,16 @@ where
     }
 }
 
+impl<'a, T, Deps> ResolveContainer<'a, T, Deps> for SingletonContainer<T>
+    where
+        T: Dependency<Deps> + 'a,
+        T: DependencyClone,
+{
+    fn resolve_container<F: Fn() -> Deps>(ct: &'a Self, get_deps: F) -> T {
+        ct.get().get_or_init(|| T::init(get_deps())).clone()
+    }
+}
+
 impl<'this, 'cont, T, SP, Index, Deps, Infer>
     Resolver<'this, &'cont SingletonContainer<T>, T, (Index, Deps, Infer)> for SP
 where
